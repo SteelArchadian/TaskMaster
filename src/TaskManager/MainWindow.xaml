@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="TaskManager.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="TaskMaster">
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar: hamburger, icon, name, centered search -->
+        <Grid x:Name="AppTitleBar">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="CaptionSpace" Width="138" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="PaneToggle" Width="40" Height="36" Margin="4,0,0,0" Padding="0"
+                    Background="Transparent" BorderThickness="0" Click="OnPaneToggle"
+                    ToolTipService.ToolTip="Open Navigation">
+                <FontIcon Glyph="&#xE700;" FontSize="16" />
+            </Button>
+            <StackPanel x:Name="TitleText" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0" Spacing="12">
+                <Image x:Name="AppIcon" Width="16" Height="16" />
+                <TextBlock Text="TaskMaster" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+            <Button x:Name="UpdateButton" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"
+                    Height="30" Padding="10,0" Visibility="Collapsed" Click="OnUpdateClick"
+                    Style="{StaticResource AccentButtonStyle}" ToolTipService.ToolTip="A new version of TaskMaster is ready">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE896;" FontSize="12" />
+                    <TextBlock Text="Update" FontSize="12" />
+                </StackPanel>
+            </Button>
+            <TextBox x:Name="SearchBox" Grid.Column="3" Width="420" Height="32" VerticalAlignment="Center"
+                     PlaceholderText="Type a name, publisher, or PID to search" TextChanged="OnSearchChanged"
+                     Padding="36,6,10,6" />
+            <FontIcon Grid.Column="3" Glyph="&#xE721;" FontSize="14" HorizontalAlignment="Left" Margin="12,0,0,0"
+                      x:Name="SearchIcon" VerticalAlignment="Center" IsHitTestVisible="False"
+                      Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Grid>
+
+        <NavigationView x:Name="Nav" Grid.Row="1" PaneDisplayMode="Auto" IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False" IsSettingsVisible="True" OpenPaneLength="240"
+                        CompactModeThresholdWidth="641" ExpandedModeThresholdWidth="1008" IsTitleBarAutoPaddingEnabled="False"
+                        SelectionChanged="OnNavSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Processes" Tag="Processes">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE71D;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Performance" Tag="Performance">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE9D9;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="App history" Tag="App history">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE81C;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Startup apps" Tag="Startup apps">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xEC4A;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Users" Tag="Users">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE716;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Details" Tag="Details">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE8FD;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Services" Tag="Services">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xEA86;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+    </Grid>
+</Window>
