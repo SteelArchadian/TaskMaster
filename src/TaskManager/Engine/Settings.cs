@@ -7,6 +7,12 @@ public enum AppTheme { System, Light, Dark }
 /// <summary>The window material: Task Manager's Mica, or see-through Acrylic / Glass (Glass's tint is adjustable).</summary>
 public enum Backdrop { Mica, MicaAlt, Acrylic, Glass }
 
+public sealed class SortPref
+{
+    public string Column { get; set; } = "";
+    public bool Descending { get; set; }
+}
+
 public sealed class ColumnPref
 {
     public string Id { get; set; } = "";
@@ -76,6 +82,9 @@ public sealed class Settings
     public bool MemoryAsPercent { get; set; }
 
     public bool GroupByType { get; set; } = true;
+
+    /// <summary>Last sort per table ("Processes" or a table name): column id and direction, restored on the next start.</summary>
+    public Dictionary<string, SortPref> Sorts { get; set; } = new();
 
     /// <summary>Column order/width/visibility for the other pages' tables, by table name.</summary>
     public Dictionary<string, List<ColumnPref>> Tables { get; set; } = new();

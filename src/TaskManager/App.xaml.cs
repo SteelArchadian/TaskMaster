@@ -40,6 +40,36 @@ public partial class App : Application
         catch (Exception ex) { Log.Error("running marker", ex); }
     }
 
+    /// <summary>
+    /// In the tray with the window hidden: no sampling, no kernel trace, efficiency mode (EcoQoS + idle priority,
+    /// like Task Manager's), and the working set handed back to Windows. Opening the window undoes it all.
+    /// </summary>
+    public static void SetDormant(bool on)
+    {
+        Sampler.Paused = on;
+        uint pid = (uint)Environment.ProcessId;
+        ProcessActions.SetEfficiency(pid, on);
+        if (on)
+        {
+            EtwIo.Stop();
+            Trim();
+            // Again once start-up or the last frame has settled, which allocates after this call.
+            Task.Delay(5000).ContinueWith(_ => { if (Sampler.Paused) Trim(); });
+        }
+        else if (Sampler.UseEtw && Elevation.IsElevated)
+            Task.Run(EtwIo.Start); // a few ms of setup; keep it off the UI thread
+    }
+
+    private static void Trim()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        SetProcessWorkingSetSize(System.Diagnostics.Process.GetCurrentProcess().Handle, -1, -1);
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool SetProcessWorkingSetSize(nint process, nint min, nint max);
+
     public App()
     {
         InitializeComponent();
@@ -79,7 +109,7 @@ public partial class App : Application
         var main = new MainWindow();
         _window = main;
         MainWindow = main;
-        if (StartInTray && !snapshotRun) Sampler.Paused = true; // hidden until opened from the tray
+        if (StartInTray && !snapshotRun) SetDormant(true); // hidden until opened from the tray
         else _window.Activate();
 
         // On close: stop sampling first so no frame reaches XAML that is being torn down.

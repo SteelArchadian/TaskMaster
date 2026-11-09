@@ -50,6 +50,8 @@ public sealed class Sampler : IDisposable
         set { bool was = _frozen; _frozen = value; if (was && !value) _wake.Set(); }
     }
 
+    public static bool UseEtw { get; } = !Environment.GetCommandLineArgs().Contains("--no-etw");
+
     public Sampler()
     {
         _thread = new Thread(Run) { IsBackground = true, Priority = ThreadPriority.BelowNormal, Name = "Sampler" };
@@ -69,7 +71,8 @@ public sealed class Sampler : IDisposable
         // Created here, not in the constructor, so its one-time engine-name lookup never touches the UI thread.
         try { _gpu = new GpuSampler(); }
         catch (Exception ex) { Log.Error("gpu init", ex); }
-        if (!Environment.GetCommandLineArgs().Contains("--no-etw")) EtwIo.Start();
+        // Started dormant (tray), the kernel trace waits until the window opens (App.SetDormant).
+        if (!_paused && UseEtw) EtwIo.Start();
 
         // Prime the CPU deltas so the first frame shown already has real percentages.
         TrySample(publish: false);

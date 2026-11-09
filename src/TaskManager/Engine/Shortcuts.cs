@@ -159,17 +159,34 @@ public static class Shortcuts
 
     // ---------- start with Windows ----------
 
+    // Run value used by builds before the logon task; removed whenever the setting changes.
     private const string StartValue = "TaskMaster";
 
-    /// <summary>Writes or removes our own Run value; --tray starts it in the notification area without a UAC prompt.</summary>
+    /// <summary>
+    /// Adds or removes the logon task (StartupTask) that starts TaskMaster in the tray with admin rights.
+    /// Needs admin once: without it, an elevated copy (--set-startup) does it behind one UAC prompt.
+    /// </summary>
     public static string? SetStartWithWindows(bool on)
     {
         try
         {
-            using var run = Registry.CurrentUser.CreateSubKey(RunKey, writable: true);
-            if (on) run.SetValue(StartValue, $"\"{ExePath}\" --tray", RegistryValueKind.String);
-            else run.DeleteValue(StartValue, throwOnMissingValue: false);
-            return null;
+            if (Elevation.IsElevated)
+            {
+                StartupTask.Set(on, ExePath);
+                using var run = Registry.CurrentUser.CreateSubKey(RunKey, writable: true);
+                run.DeleteValue(StartValue, throwOnMissingValue: false);
+                return null;
+            }
+            var psi = new ProcessStartInfo(ExePath) { UseShellExecute = true, Verb = "runas" };
+            psi.ArgumentList.Add("--set-startup");
+            psi.ArgumentList.Add(on ? "on" : "off");
+            using var p = Process.Start(psi)!;
+            p.WaitForExit(15000);
+            return p.HasExited && p.ExitCode == 0 ? null : "Couldn't change it. Details are in the log.";
+        }
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+            return "Windows needs admin permission once to set this up, and the prompt was cancelled.";
         }
         catch (Exception ex) { Log.Error("start with windows", ex); return ex.Message; }
     }

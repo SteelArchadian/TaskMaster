@@ -18,7 +18,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <AssemblyTitle>TaskMaster</AssemblyTitle>
     <Product>TaskMaster</Product>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <!-- Our own icon (cut from the user's art by tools/make_icon.py), on the exe and the window. -->
     <ApplicationIcon>Assets\TaskManager.ico</ApplicationIcon>
     <!-- Program.Main decides agent / hand-off / elevation before XAML starts. -->

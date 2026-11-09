@@ -9,8 +9,11 @@ namespace TaskManager.Engine;
 /// </summary>
 public static unsafe class SingleInstance
 {
-    private const string ShowName = @"Local\SteelArchadian.TaskManager.Show";
-    private const string ToggleName = @"Local\SteelArchadian.TaskManager.Toggle";
+    // Test runs with their own data folder (TASKMASTER_DATA) are their own instance, so they never wake the user's copy
+    // (string.GetHashCode differs per process, hence a real hash).
+    private static readonly string Suffix = Environment.GetEnvironmentVariable("TASKMASTER_DATA") is { } d ? "." + Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(d.ToLowerInvariant())))[..12] : "";
+    private static readonly string ShowName = @"Local\SteelArchadian.TaskManager.Show" + Suffix;
+    private static readonly string ToggleName = @"Local\SteelArchadian.TaskManager.Toggle" + Suffix;
     // SYSTEM and admins full access; interactive users may wait on and set it; medium label, no write-up.
     private const string Sddl = "D:(A;;GA;;;SY)(A;;GA;;;BA)(A;;0x100002;;;IU)S:(ML;;NW;;;ME)";
 

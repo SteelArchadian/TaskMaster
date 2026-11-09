@@ -21,8 +21,9 @@ public sealed partial class ProcessesPage : Page
     private readonly TableContext _ctx;
     private readonly Dictionary<ColumnId, TextBlock> _headerTotals = new();
     private readonly Dictionary<ColumnId, (Grid cell, FontIcon chevron)> _headerCells = new();
-    private ColumnId _sortColumn = ColumnId.Name;
-    private bool _sortDescending;
+    // Task Manager starts on Name; after that, whatever the user sorted by last.
+    private ColumnId _sortColumn = App.Settings.Sorts.TryGetValue("Processes", out var s) && Enum.TryParse<ColumnId>(s.Column, out var c) ? c : ColumnId.Name;
+    private bool _sortDescending = App.Settings.Sorts.TryGetValue("Processes", out var s) && s.Descending;
     private bool _groupByType = App.Settings.GroupByType;
     private string _filter = "";
     private Snapshot? _frame;
@@ -382,6 +383,8 @@ public sealed partial class ProcessesPage : Page
             // Task Manager sorts resource columns biggest-first on the first click.
             _sortDescending = _columns.First(c => c.Id == id).IsHeat || id == ColumnId.Pid;
         }
+        App.Settings.Sorts["Processes"] = new SortPref { Column = _sortColumn.ToString(), Descending = _sortDescending };
+        App.Settings.Save();
         UpdateSortVisuals();
         Rebuild();
     }

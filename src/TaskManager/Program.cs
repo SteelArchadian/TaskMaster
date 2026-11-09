@@ -35,6 +35,11 @@ public static class Program
             return 0;
         }
 
+        // Elevated helper for "Start with Windows" (see Shortcuts.SetStartWithWindows).
+        int ss = Array.IndexOf(args, "--set-startup");
+        if (ss >= 0 && ss + 1 < args.Length)
+            return Shortcuts.SetStartWithWindows(args[ss + 1] == "on") == null ? 0 : 1;
+
         // Ctrl+Shift+Esc left to Windows while the rest is taken over: hand this launch to the real Task Manager.
         if (Shortcuts.IsCtrlShiftEscLaunch(args) && !Settings.Load().ReplaceCtrlShiftEsc
             && Shortcuts.StartRealTaskManager(string.Join(' ', args.Skip(1))))
@@ -46,7 +51,7 @@ public static class Program
             Log.Info("launch: " + Environment.CommandLine);
             if (SingleInstance.Signal(toggle: false)) return 0;
             // A declined UAC prompt (or --no-elevate) carries on without admin; some columns stay blank then.
-            // Started with Windows (--tray) skips it too: a UAC prompt at sign-in is the opposite of quiet.
+            // Started with Windows (--tray) comes from the logon task, already elevated; never prompt at sign-in.
             if (!Elevation.IsElevated && !args.Contains("--no-elevate") && !args.Contains("--elevated") && !args.Contains("--tray")
                 && Elevation.Relaunch(args.Where(a => !a.EndsWith("taskmgr.exe", StringComparison.OrdinalIgnoreCase)).Append("--elevated")))
                 return 0;

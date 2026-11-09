@@ -97,8 +97,9 @@ public sealed partial class DataTable : Grid
     {
         _prefsKey = prefsKey;
         Columns = LoadPrefs(prefsKey, columns);
-        SortColumn = sortColumn;
-        SortDescending = descending;
+        bool saved = App.Settings.Sorts.TryGetValue(prefsKey, out var sort) && Columns.Any(c => c.Id == sort.Column);
+        SortColumn = saved ? sort!.Column : sortColumn;
+        SortDescending = saved ? sort!.Descending : descending;
 
         List = new ListView
         {
@@ -388,6 +389,8 @@ public sealed partial class DataTable : Grid
         if (col == null) return;
         if (SortColumn == id) SortDescending = !SortDescending;
         else { SortColumn = id; SortDescending = col.DescendingFirst; }
+        App.Settings.Sorts[_prefsKey] = new SortPref { Column = SortColumn, Descending = SortDescending };
+        App.Settings.Save();
         UpdateSortVisuals();
         Apply();
     }

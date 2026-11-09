@@ -69,9 +69,9 @@ public sealed partial class SettingsPage : Page
         var tray = new ToggleSwitch { IsOn = S.CloseToTray, OnContent = "On", OffContent = "Off" };
         tray.Toggled += (_, _) => { S.CloseToTray = tray.IsOn; S.Save(); Main?.UpdateTray(); };
         stack.Children.Add(Card("", "Close to the notification area",
-            "Closing the window keeps TaskMaster running as an icon by the clock. Click it to open; right-click for Quit.", tray));
+            "Closing the window keeps TaskMaster running as an icon by the clock, dormant: no updates, efficiency mode, memory released. Click it to open; right-click for Quit.", tray));
 
-        var startup = new ToggleSwitch { IsOn = S.StartWithWindows, OnContent = "On", OffContent = "Off" };
+        var startup = new ToggleSwitch { IsOn = S.StartWithWindows && StartupTask.Exists(), OnContent = "On", OffContent = "Off" };
         startup.Toggled += (_, _) =>
         {
             if (Shortcuts.SetStartWithWindows(startup.IsOn) != null) { startup.IsOn = S.StartWithWindows; return; }
@@ -79,7 +79,7 @@ public sealed partial class SettingsPage : Page
             S.Save();
         };
         stack.Children.Add(Card("", "Start with Windows",
-            "Starts quietly in the notification area when you sign in, ready to open instantly. Opened this way it runs without administrator rights.", startup));
+            "Starts quietly in the notification area when you sign in, with administrator rights and no prompt. Turning it on or off asks for admin once.", startup));
 
         stack.Children.Add(new TextBlock { Text = "Keyboard shortcuts", FontWeight = FontWeights.SemiBold, FontSize = 14, Margin = new Thickness(0, 20, 0, 6) });
 

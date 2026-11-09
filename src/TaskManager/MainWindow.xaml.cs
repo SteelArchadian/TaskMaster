@@ -290,7 +290,7 @@ public sealed partial class MainWindow : Window
         if (args.DidPresenterChange || args.DidSizeChange)
         {
             // Nothing to draw while minimized, so stop sampling (Task Manager keeps polling).
-            App.Sampler.Paused = sender.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Minimized };
+            App.Sampler.Paused = _hidden || sender.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Minimized };
         }
     }
 
@@ -403,7 +403,7 @@ public sealed partial class MainWindow : Window
         SaveBounds();
         _hidden = true;
         AppWindow.Hide();
-        App.Sampler.Paused = true; // nothing to draw
+        App.SetDormant(true);
         UpdateTray();
     }
 
@@ -414,7 +414,7 @@ public sealed partial class MainWindow : Window
         if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Minimized } p) p.Restore();
         Activate();
         Native.User32.SetForegroundWindow(WinRT.Interop.WindowNative.GetWindowHandle(this));
-        App.Sampler.Paused = false;
+        App.SetDormant(false);
         UpdateTray();
     }
 
